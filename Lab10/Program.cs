@@ -14,7 +14,8 @@ namespace Lab10
             int option;
 
             List<Movie> movieList = createInitMovieList();
-            Hashtable categories = createCategoryList(movieList);
+            Hashtable categories = new Hashtable();
+           
 
 
 
@@ -46,7 +47,7 @@ namespace Lab10
                         break;
 
                    case 4:
-                        addMovies(movieList);
+                        addMovies(movieList,out categories);
                         break;
 
 
@@ -261,11 +262,11 @@ namespace Lab10
 
         }
 
-        public static void addMovies(List<Movie> input)
+        public static void addMovies(List<Movie> input,out Hashtable catHash)
         {
             string title;
             string category;
-
+            
             Console.WriteLine("Enter a new movie");
 
             title = getMovieAttributeS("title");
@@ -273,6 +274,8 @@ namespace Lab10
 
 
             input.Add(new Movie(title, category));
+            catHash = createCategoryList(input);
+
 
 
         }
