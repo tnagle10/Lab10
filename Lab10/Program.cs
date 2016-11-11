@@ -15,10 +15,7 @@ namespace Lab10
 
             List<Movie> movieList = createInitMovieList();
             Hashtable categories = new Hashtable();
-           
-
-
-
+        
             do
             {
 
@@ -31,23 +28,37 @@ namespace Lab10
                                      "Add movie" };
 
                 genList(options, out option);
-
+                string title = "";
+                
                 switch (option)
                 {
 
                     case 1:
                         listMovies(movieList);
-
                         break;
                     case 2:
-                        findMovieByTitle(movieList);
+                        title = getMovieAttributeS("title");
+                        if (findMovieByTitle(movieList, title))
+                            {
+                            Console.WriteLine("Congratulations, we have movie {0} ", title);
+                            }
+                        else
+                        {
+                            Console.WriteLine("Sorry, we don't have movie {0} ", title);
+                        }
                         break;
                     case 3:
-                        findMoviesByCategory(movieList,categories);
+                        
+                        findMoviesByCategory(movieList,out categories);
+
                         break;
 
                    case 4:
-                        addMovies(movieList,out categories);
+                                 
+                        Console.WriteLine("Enter a new movie");
+                        title = getMovieAttributeS("title");
+                        string category = getMovieAttributeS("category");
+                        addMovies(movieList,title,category,out categories);
                         break;
 
 
@@ -89,7 +100,7 @@ namespace Lab10
 
                 if ((input > 0) && (input <= names.Length + 1))
                 {
-                    Console.WriteLine("\nYou chose " + names[input - 1] + "\n");
+                    //Console.WriteLine("\nYou chose " + names[input - 1] + "\n");
                     valid = true;
                 }
                 else
@@ -107,20 +118,20 @@ namespace Lab10
         {
             Boolean valid = false;
             int input = 0;
-            int ctr = 1;
-            int namesEntry = 0;
+
             string[] names = new string[catHash.Count];
             while (valid == false)
             {
-
-                Console.WriteLine("Please choose one of the following options: ");
+                
+                int ctr = 0;
+                Console.WriteLine("\nPlease choose one of the following options");
 
                 foreach (DictionaryEntry entry in catHash)
                 {
                     //Console.WriteLine(ctr + ": " + entry.Value);
-                    names[namesEntry] = entry.Value.ToString();
+                    names[ctr] = entry.Value.ToString();
                     ctr++;
-                    namesEntry++;
+                    
                 }
 
 
@@ -135,20 +146,21 @@ namespace Lab10
 
                 if (!(int.TryParse(Console.ReadLine(), out input)))
                 {
-                    Console.WriteLine("You entered an invalid number");
+                    Console.WriteLine("You entered an invalid number\n");
 
                 }
 
 
 
-                if ((input > 0) && (input <= names.Length + 1))
+                if ((input > 0) && (input <= names.Length))
                 {
-                    Console.WriteLine("\nYou chose " + names[input - 1] + "\n");
+                    //Console.WriteLine("\nYou chose " + names[input - 1] + "\n");
                     
                     valid = true;
                 }
                 else
                 {
+                    Console.WriteLine("You entered an invalid number");
                     valid = false;
                 }
 
@@ -226,8 +238,6 @@ namespace Lab10
             
         }
 
-
-
         static void Search(Hashtable HTable)
         {
             Console.Write("Please enter the name your are looking for:  ");
@@ -246,35 +256,54 @@ namespace Lab10
 
         }
 
-
         public static void listMovies(List<Movie> input)
         {
+
+            Hashtable catHash = createCategoryList(input);
             Console.WriteLine("\nTitle                   Category");
             Console.WriteLine("**********************************");
 
-            foreach (Movie movies in input)
+
+            List<string> titles = new List<string>();
+
+            foreach (Movie movie in input)
             {
 
+                titles.Add(movie.Title1);
+                
+            }
 
-                Console.WriteLine(movies.Title1.PadRight(25) + " " + movies.Category1.PadRight(10));
-
+            titles.Sort();
+            
+            foreach (string title in titles)
+            {
+                
+               
+                Movie movie = input.Find(x => x.Title1 == title);
+                Console.WriteLine(movie.Title1.PadRight(25) + " " + movie.Category1.PadRight(10));
+                
             }
 
         }
 
-        public static void addMovies(List<Movie> input,out Hashtable catHash)
+        public static void addMovies(List<Movie> input,string title, string category,out Hashtable catHash)
         {
-            string title;
-            string category;
             
-            Console.WriteLine("Enter a new movie");
+            if (!(findMovieByTitle(input,title)))
+                // Movie is not in list
+            {
+                input.Add(new Movie(title, category));
+                
 
-            title = getMovieAttributeS("title");
-            category = getMovieAttributeS("category");
+            }
+            else
+            {
+                Console.WriteLine("The movie {0} already exists in the list", title);
+            }
+        
+                catHash = createCategoryList(input);
 
 
-            input.Add(new Movie(title, category));
-            catHash = createCategoryList(input);
 
 
 
@@ -319,44 +348,37 @@ namespace Lab10
 
         //}
 
-
-
-
-        public static void findMovieByTitle(List<Movie> input)
+        public static bool findMovieByTitle(List<Movie> input,string title)
         {
-            string title = getMovieAttributeS("title");
+            
 
 
             for (int i = 0; i < input.Count; i++)
             {
                 if (input[i].Title1 == title)
                 {
-                    Console.WriteLine("Congratulations, we have movie {0} ", input[i].Title1);
-                    return;
+                    
+                    return true;
                 }
             }
 
-            Console.WriteLine("Sorry we don't have {0} ", title);
-
+           
+            return false;
 
         }
 
 
-        public static void findMoviesByCategory(List<Movie> movieList, Hashtable catHash)
+        public static void findMoviesByCategory(List<Movie> movieList, out Hashtable catHash)
         {
-            ////Search(categories);
-            //Console.WriteLine("Please choose one of the following categories to search for: ");
-            //foreach (DictionaryEntry entry in catHash)
-            //{
-            //    Console.WriteLine("{0}", entry.Value);
-            //}
-
+            
             string cat;
+            catHash = createCategoryList(movieList);
             genList(catHash,out cat);
 
             //string category = getMovieAttributeS(cat);
             Console.WriteLine(cat);
             List<Movie> moviesFound = movieList.FindAll(x => x.Category1 == cat);
+            //moviesFound.Sort();
             listMovies(moviesFound);
 
         }
